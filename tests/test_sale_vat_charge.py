@@ -120,7 +120,7 @@ EXPECTED_VAT_RATES = {
         ItemType.ebook: Decimal(20),
         ItemType.enewspaper: Decimal(20),
     },
-    'EL': {
+    'GR': {
         ItemType.generic_physical_good: Decimal(24),
         ItemType.generic_electronic_service: Decimal(24),
         ItemType.generic_telecommunications_service: Decimal(24),
