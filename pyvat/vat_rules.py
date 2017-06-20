@@ -1,9 +1,7 @@
 import datetime
-from decimal import Decimal
 from .countries import EU_COUNTRY_CODES
-from .item_type import ItemType
 from .vat_charge import VatCharge, VatChargeAction
-from .utils import ensure_decimal
+from .vat_rates import VAT_RATES
 
 
 JANUARY_1_2015 = datetime.date(2015, 1, 1)
@@ -96,7 +94,7 @@ class EuVatRulesMixin(object):
            (not buyer.is_business and date >= JANUARY_1_2015):
             return VatCharge(VatChargeAction.charge,
                              buyer.country_code,
-                             self.get_vat_rate(item_type))
+                             self.get_vat_rate(item_type, date))
 
         # EU consumers are charged VAT in the seller's country prior to January
         # 1st, 2015.
@@ -130,7 +128,7 @@ class EuVatRulesMixin(object):
         if buyer.country_code == seller.country_code:
             return VatCharge(VatChargeAction.charge,
                              seller.country_code,
-                             self.get_vat_rate(item_type))
+                             self.get_vat_rate(item_type, date))
 
         # Businesses in other EU countries are not charged VAT but are
         # responsible for accounting for the tax through the reverse-charge
@@ -143,123 +141,47 @@ class EuVatRulesMixin(object):
         # Consumers in other EU countries are charged VAT in their country of
         # residence after January 1st, 2015. Before this date, you charge VAT
         # in the country where the company is located.
-        if date >= datetime.date(2015, 1, 1):
+        if date >= JANUARY_1_2015:
             buyer_rules = VAT_RULES[buyer.country_code]
 
             return VatCharge(VatChargeAction.charge,
                              buyer.country_code,
-                             buyer_rules.get_vat_rate(item_type))
+                             buyer_rules.get_vat_rate(item_type, date))
         else:
             return VatCharge(VatChargeAction.charge,
                              seller.country_code,
-                             self.get_vat_rate(item_type))
+                             self.get_vat_rate(item_type, date))
 
 
-class ConstantEuVatRateRules(EuVatRulesMixin):
+class EuVatRateRule(EuVatRulesMixin):
     """VAT rules for a country with a constant VAT rate in the entiry country.
     """
 
-    def __init__(self, vat_rate):
-        self.vat_rate = ensure_decimal(vat_rate)
+    def __init__(self, vat_rates):
+        self.vat_rates = vat_rates
 
-    def get_vat_rate(self, item_type):
-        return self.vat_rate
-
-
-class AtVatRules(EuVatRulesMixin):
-    """VAT rules for Austria.
-    """
-
-    def get_vat_rate(self, item_type):
-        if item_type == ItemType.prepaid_broadcasting_service:
-            return Decimal(10)
-        return Decimal(20)
-
-
-class FrVatRules(EuVatRulesMixin):
-    """VAT rules for France.
-    """
-
-    def get_vat_rate(self, item_type):
-        if item_type.is_broadcasting_service:
-            return Decimal(10)
-        if item_type == ItemType.ebook:
-            return Decimal('5.5')
-        if item_type == ItemType.enewspaper:
-            return Decimal('2.1')
-        return Decimal(20)
-
-
-class ElVatRules(EuVatRulesMixin):
-    """VAT rules for Greece.
-    """
-
-    def get_vat_rate(self, item_type):
-        return Decimal(24)
-
-
-class LuVatRules(EuVatRulesMixin):
-    """VAT rules for Luxembourg.
-    """
-
-    def get_vat_rate(self, item_type):
-        if item_type.is_broadcasting_service:
-            return Decimal(3)
-        return Decimal(17)
-
-
-class PlVatRules(EuVatRulesMixin):
-    """VAT rules for Poland.
-    """
-
-    def get_vat_rate(self, item_type):
-        if item_type.is_broadcasting_service:
-            return Decimal(8)
-        return Decimal(23)
-
-
-class EsVatRules(EuVatRulesMixin):
-    """VAT rules for Spain.
-    """
-
-    def get_vat_rate(self, item_type):
-        if item_type == ItemType.ebook:
-            return Decimal(4)
-        return Decimal(21)
+    def get_vat_rate(self, item_type, date):
+        rates = None
+        for item in self.vat_rates:
+            if date >= item['valid_from'] and \
+               not rates:
+                rates = item
+            if date >= item['valid_from'] and \
+               rates and rates['valid_from'] < item['valid_from']:
+                rates = item
+        if not rates:
+            raise ValueError('`date` is invalid, date: ', date)
+        for category in rates['rates']:
+            if category == item_type:
+                return rates['rates'][category]
+        raise ValueError('`item_type` is invalid, item_type: ', item_type)
 
 
 # VAT rates are based on the report from January 1st, 2017
 # http://ec.europa.eu/taxation_customs/sites/taxation/files/resources/documents/taxation/vat/how_vat_works/rates/vat_rates_en.pdf
-VAT_RULES = {
-    'AT': AtVatRules(),
-    'BE': ConstantEuVatRateRules(21),
-    'BG': ConstantEuVatRateRules(20),
-    'CY': ConstantEuVatRateRules(19),
-    'CZ': ConstantEuVatRateRules(21),
-    'DE': ConstantEuVatRateRules(19),
-    'DK': ConstantEuVatRateRules(25),
-    'EE': ConstantEuVatRateRules(20),
-    'EL': ElVatRules(),
-    'ES': EsVatRules(),
-    'FI': ConstantEuVatRateRules(24),
-    'FR': FrVatRules(),
-    'GB': ConstantEuVatRateRules(20),
-    'HR': ConstantEuVatRateRules(25),
-    'HU': ConstantEuVatRateRules(27),
-    'IE': ConstantEuVatRateRules(23),
-    'IT': ConstantEuVatRateRules(22),
-    'LT': ConstantEuVatRateRules(21),
-    'LU': LuVatRules(),
-    'LV': ConstantEuVatRateRules(21),
-    'MT': ConstantEuVatRateRules(18),
-    'NL': ConstantEuVatRateRules(21),
-    'PL': PlVatRules(),
-    'PT': ConstantEuVatRateRules(23),
-    'RO': ConstantEuVatRateRules(19),
-    'SE': ConstantEuVatRateRules(25),
-    'SK': ConstantEuVatRateRules(20),
-    'SI': ConstantEuVatRateRules(22),
-}
+VAT_RULES = {}
+for country_code in EU_COUNTRY_CODES:
+    VAT_RULES[country_code] = EuVatRateRule(VAT_RATES[country_code])
 
 
 """VAT rules by country.
