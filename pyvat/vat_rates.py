@@ -98,6 +98,28 @@ VAT_RATES = {
             ItemType.ebook: Decimal('19.0'),
             ItemType.enewspaper: Decimal('19.0')
         }
+    }, {
+        'valid_from': datetime.date(2020, 7, 1),
+        'rates': {
+            ItemType.generic_physical_good: Decimal('16.0'),
+            ItemType.generic_electronic_service: Decimal('16.0'),
+            ItemType.generic_telecommunications_service: Decimal('16.0'),
+            ItemType.generic_broadcasting_service: Decimal('16.0'),
+            ItemType.prepaid_broadcasting_service: Decimal('16.0'),
+            ItemType.ebook: Decimal('16.0'),
+            ItemType.enewspaper: Decimal('16.0')
+        }
+    }, {
+        'valid_from': datetime.date(2021, 1, 1),
+        'rates': {
+            ItemType.generic_physical_good: Decimal('19.0'),
+            ItemType.generic_electronic_service: Decimal('19.0'),
+            ItemType.generic_telecommunications_service: Decimal('19.0'),
+            ItemType.generic_broadcasting_service: Decimal('19.0'),
+            ItemType.prepaid_broadcasting_service: Decimal('19.0'),
+            ItemType.ebook: Decimal('19.0'),
+            ItemType.enewspaper: Decimal('19.0')
+        }
     }],
     'DK': [{
         'valid_from': datetime.date(2002, 1, 1),
