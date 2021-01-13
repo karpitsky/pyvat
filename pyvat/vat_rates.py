@@ -490,5 +490,17 @@ VAT_RATES = {
             ItemType.ebook: Decimal('20.0'),
             ItemType.enewspaper: Decimal('20.0')
         }
+    }],
+    'XI': [{
+        'valid_from': datetime.date(2021, 1, 1),
+        'rates': {
+            ItemType.generic_physical_good: Decimal('20.0'),
+            ItemType.generic_electronic_service: Decimal('20.0'),
+            ItemType.generic_telecommunications_service: Decimal('20.0'),
+            ItemType.generic_broadcasting_service: Decimal('20.0'),
+            ItemType.prepaid_broadcasting_service: Decimal('20.0'),
+            ItemType.ebook: Decimal('20.0'),
+            ItemType.enewspaper: Decimal('20.0')
+        }
     }]
 }
