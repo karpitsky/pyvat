@@ -184,6 +184,17 @@ VAT_RATES = {
             ItemType.ebook: Decimal('24.0'),
             ItemType.enewspaper: Decimal('24.0')
         }
+    }, {
+        'valid_from': datetime.date(2024, 9, 1),
+        'rates': {
+            ItemType.generic_physical_good: Decimal('25.5'),
+            ItemType.generic_electronic_service: Decimal('25.5'),
+            ItemType.generic_telecommunications_service: Decimal('25.5'),
+            ItemType.generic_broadcasting_service: Decimal('25.5'),
+            ItemType.prepaid_broadcasting_service: Decimal('25.5'),
+            ItemType.ebook: Decimal('25.5'),
+            ItemType.enewspaper: Decimal('25.5')
+        }
     }],
     'FR': [{
         'valid_from': datetime.date(2014, 1, 1),
