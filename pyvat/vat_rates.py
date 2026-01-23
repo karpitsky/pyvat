@@ -5,7 +5,7 @@ from decimal import Decimal
 
 from .item_type import ItemType
 
-# http://ec.europa.eu/taxation_customs/tic/public/vatRates/vatratesSearch.html
+# https://vatchanges.com/
 VAT_RATES = {
     'AT': [{
         'valid_from': datetime.date(2002, 1, 1),
